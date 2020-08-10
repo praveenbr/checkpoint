@@ -1,0 +1,24 @@
+sudo: required
+services:
+        - docker
+
+before_install:
+        - docker build -t pbalacha/react-tset -f ./client/Dockerfile.dev ./client
+
+script:
+        - docker run pbalacha/react-test npm test -- --coverage
+
+after_success:
+        - docker build -t pbalacha/multi-client ./client
+        - docker build -t pbalacha/multi-nginx ./nginx
+        - docker build -t pbalacha/multi-server ./server
+        - docker build -t pbalacha/multi-worker ./worker
+
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+        - docker push pbalacha/multi-client
+        - docker push pbalacha/multi-nginx
+        - docker push pbalacha/multi-server
+        - docker push pbalacha/multi-worker
+
+
+
